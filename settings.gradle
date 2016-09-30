@@ -1,2 +1,3 @@
 rootProject.name = 'SearchProgram'
 
+include 'Main'

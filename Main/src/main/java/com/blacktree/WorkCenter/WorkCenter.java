@@ -7,6 +7,7 @@ import com.blacktree.DBOperation.URLFrontier;
 import com.blacktree.url.URL;
 import com.blacktree.network.GetPageUsingGet;
 import com.blacktree.utils.LinkCollect;
+import com.blacktree.utils.MD5Util;
 import com.blacktree.utils.StringUtil;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 //TODO make it working on multy threads
 public class WorkCenter {
 
-    public static final long DEFAULT_MAX_COUNT = 1000;
+    private static final long DEFAULT_MAX_COUNT = 1000;
 
     private URLFrontier urlFrontier;
 
@@ -44,7 +45,7 @@ public class WorkCenter {
             urlFrontier = new URLFrontier();
             for (int i = 0; i < urls.length; i++) {
                 //urlFrontier.putURL(urls[i]);
-                urlFrontier.put(urls[i].getUrl(),urls[i]);
+                urlFrontier.put(MD5Util.toMD5HexString(urls[i].getUrl()),urls[i]);
             }
             getPageUsingGet = new GetPageUsingGet();
             linkCollect = new LinkCollect();
@@ -68,10 +69,12 @@ public class WorkCenter {
                     stringBuilder = new StringBuilder();
                     URL tempUrl = new URL();
                     tempUrl.setUrl(list.get(i));
-                    stringBuilder.append(GetPageUsingGet.DEFAULT_DIRECTORY).append("\\").append(StringUtil.removeHttpPrefix(tempUrl.getUrl()));
+                    //TODO use md5 key as the path of file，which should be fixed.
+                    String tempKey = MD5Util.toMD5HexString(tempUrl.getUrl());
+                    tempUrl.setLocalFilePath(tempKey);
+                    stringBuilder.append(GetPageUsingGet.DEFAULT_DIRECTORY).append("\\").append(tempKey);
                     tempUrl.setLocalFilePath(stringBuilder.toString());
-                    stringBuilder = null;
-                    urlFrontier.put(tempUrl.getUrl(),tempUrl);
+                    urlFrontier.put(tempKey,tempUrl);
                 }
         }
     }
