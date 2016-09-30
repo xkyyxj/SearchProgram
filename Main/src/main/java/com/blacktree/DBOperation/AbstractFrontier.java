@@ -53,6 +53,7 @@ public abstract class AbstractFrontier {
         environment = new Environment(file,environmentConfig);
         databaseConfig = new DatabaseConfig();
         databaseConfig.setAllowCreate(true);
+        databaseConfig.setSortedDuplicates(false);
         database = environment.openDatabase(null, "url_database", databaseConfig);
     }
 
