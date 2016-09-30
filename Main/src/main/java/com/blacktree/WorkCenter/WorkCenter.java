@@ -22,15 +22,13 @@ public class WorkCenter {
 
     private URLFrontier urlFrontier;
 
-    private GetPageUsingGet getPageUsingGet;
-
-    private LinkCollect linkCollect;
-
     private WorkCenterDatabaseListener workCenterDatabaseListener;
 
     private long maxCount = DEFAULT_MAX_COUNT;
 
-    private long count = 0;
+    private int machineProcessorsNum = 0;
+
+    private int threadNum = 2;
 
     public WorkCenter(URL ... urls){
         initialize(urls);
@@ -47,35 +45,19 @@ public class WorkCenter {
                 //urlFrontier.putURL(urls[i]);
                 urlFrontier.put(MD5Util.toMD5HexString(urls[i].getUrl()),urls[i]);
             }
-            getPageUsingGet = new GetPageUsingGet();
-            linkCollect = new LinkCollect();
             workCenterDatabaseListener = new WorkCenterDatabaseListener();
             urlFrontier.setDatabaseListener(workCenterDatabaseListener);
+            machineProcessorsNum = Runtime.getRuntime().availableProcessors();
         }
     }
 
     public void run(){
-        URL url;
-        List<String> list;
-        StringBuilder stringBuilder;
-        while((url = urlFrontier.getNextAndDelete()) != null && (count++) < maxCount) {
-            //TODO using the url as filePath, should use filePath variable of URL class.
-            getPageUsingGet.setURI(url.getUrl());
-            getPageUsingGet.saveHTMLInFile();
-            linkCollect.setDocFile(url.getLocalFilePath());
-            list = linkCollect.getLinkURL();
-            if(list != null && list.size() > 0)
-                for(int i = 0;i < list.size();i++) {
-                    stringBuilder = new StringBuilder();
-                    URL tempUrl = new URL();
-                    tempUrl.setUrl(list.get(i));
-                    //TODO use md5 key as the path of file，which should be fixed.
-                    String tempKey = MD5Util.toMD5HexString(tempUrl.getUrl());
-                    tempUrl.setLocalFilePath(tempKey);
-                    stringBuilder.append(GetPageUsingGet.DEFAULT_DIRECTORY).append("\\").append(tempKey);
-                    tempUrl.setLocalFilePath(stringBuilder.toString());
-                    urlFrontier.put(tempKey,tempUrl);
-                }
+        //TODO finish this method
+        if(machineProcessorsNum > 0){
+            threadNum += machineProcessorsNum;
+        }
+        for(int i = 0;i < threadNum;i++){
+
         }
     }
 
@@ -83,13 +65,20 @@ public class WorkCenter {
         urlFrontier.clean();
     }
 
-    class WorkCenterDatabaseListener implements DatabaseListener{
+    private class WorkCenterDatabaseListener implements DatabaseListener{
 
         public void databaseChanged(DatabaseEvent databaseEvent) {
             if(databaseEvent.getDbEventType() == DBEventType.DBEMPTY){
-                //TODO If finish search, then clean all things
+                //TODO 如果仍有线程正在产生网页链接信息，需处理
                 clean();
             }
+        }
+    }
+
+    private class WorkItemEventListener implements WorkItemListener{
+
+        public void handleEvent(WorkItemEvent event) {
+            //TODO finish this method!
         }
     }
 

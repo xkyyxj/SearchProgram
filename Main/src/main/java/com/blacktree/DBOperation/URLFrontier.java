@@ -39,6 +39,10 @@ public class URLFrontier extends AbstractFrontier{
         return null;
     }
 
+    /**
+     * Get URL from Berkerley Database
+     *
+     */
     public URL getNextAndDelete(){
         URL tempURL;
         if(readCursor == null)
