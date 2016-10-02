@@ -1,6 +1,7 @@
 package com.blacktree.network;
 
 import com.blacktree.utils.IOUtil;
+import com.blacktree.utils.MD5Util;
 import com.blacktree.utils.StringUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -30,7 +31,7 @@ public class GetPageUsingGet {
     /**
      * default directory of the documents
      */
-    public static final String DEFAULT_DIRECTORY="D:\\HTML";
+    public static final String DEFAULT_DIRECTORY="D:\\HTML2";
 
     private String uri = null;
 
@@ -128,9 +129,10 @@ public class GetPageUsingGet {
      */
     public String formatFilePath(){
         StringBuilder returnResult = new StringBuilder();
-        String temp;
-        temp = StringUtil.removeHttpPrefix(uri);
-        returnResult.append(DEFAULT_DIRECTORY).append("\\").append(temp);
+        /*String temp;
+        temp = StringUtil.removeHttpPrefix(uri);*/
+        //TODO using MD5 value as name of file
+        returnResult.append(DEFAULT_DIRECTORY).append("\\").append(MD5Util.toMD5HexString(uri));
         return returnResult.toString();
     }
 

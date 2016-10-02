@@ -11,6 +11,7 @@ import com.blacktree.utils.MD5Util;
 import com.blacktree.utils.StringUtil;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by wangqchf on 2016/9/22.
@@ -22,13 +23,15 @@ public class WorkCenter {
 
     private URLFrontier urlFrontier;
 
-    private WorkCenterDatabaseListener workCenterDatabaseListener;
-
     private long maxCount = DEFAULT_MAX_COUNT;
+
+    private AtomicLong atomicMaxCount;
 
     private int machineProcessorsNum = 0;
 
     private int threadNum = 2;
+
+    private ThreadGroup threadGroup;
 
     public WorkCenter(URL ... urls){
         initialize(urls);
@@ -45,9 +48,9 @@ public class WorkCenter {
                 //urlFrontier.putURL(urls[i]);
                 urlFrontier.put(MD5Util.toMD5HexString(urls[i].getUrl()),urls[i]);
             }
-            workCenterDatabaseListener = new WorkCenterDatabaseListener();
-            urlFrontier.setDatabaseListener(workCenterDatabaseListener);
             machineProcessorsNum = Runtime.getRuntime().availableProcessors();
+            threadGroup = new ThreadGroup("WorkItemGroup");
+            atomicMaxCount = new AtomicLong(maxCount);
         }
     }
 
@@ -56,8 +59,13 @@ public class WorkCenter {
         if(machineProcessorsNum > 0){
             threadNum += machineProcessorsNum;
         }
+        Thread thread;
+        WorkItemContext workItemContext = new WorkItemContext(atomicMaxCount,urlFrontier);
+        workItemContext.setNumLimit(true);
+        WorkItemEventListener workItemEventListener = new WorkItemEventListener();
         for(int i = 0;i < threadNum;i++){
-
+            thread = new Thread(threadGroup,new WorkItem(workItemContext,workItemEventListener));
+            thread.start();
         }
     }
 
@@ -65,20 +73,17 @@ public class WorkCenter {
         urlFrontier.clean();
     }
 
-    private class WorkCenterDatabaseListener implements DatabaseListener{
-
-        public void databaseChanged(DatabaseEvent databaseEvent) {
-            if(databaseEvent.getDbEventType() == DBEventType.DBEMPTY){
-                //TODO 如果仍有线程正在产生网页链接信息，需处理
-                clean();
-            }
-        }
-    }
-
     private class WorkItemEventListener implements WorkItemListener{
 
         public void handleEvent(WorkItemEvent event) {
             //TODO finish this method!
+            if(event.getEventType() == WorkItemEventType.DB_EMPTY){
+                System.out.println("some thread are waiting!!!");
+            } else if (event.getEventType() == WorkItemEventType.MAX_NUMBER_LIMIT){
+                synchronized (WorkCenter.this) {
+                    threadGroup.interrupt();
+                }
+            }
         }
     }
 

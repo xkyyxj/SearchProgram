@@ -4,6 +4,8 @@ import com.sleepycat.bind.serial.StoredClassCatalog;
 import com.sleepycat.je.*;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by wangqchf on 2016/9/22.
@@ -12,8 +14,6 @@ public abstract class AbstractFrontier {
 
     public static final String  DEFAULT_DATABASE_DIRECTORY = "C:\\database";
 
-    protected DatabaseListener databaseListener;
-
     protected Environment environment;
 
     protected Database database;
@@ -21,6 +21,8 @@ public abstract class AbstractFrontier {
     protected EnvironmentConfig environmentConfig;
 
     protected DatabaseConfig databaseConfig;
+
+    protected List<DatabaseListener> databaseListenerList;
 
     private String homeDirectory;
 
@@ -37,8 +39,8 @@ public abstract class AbstractFrontier {
     }
 
 
-    public void setDatabaseListener(DatabaseListener databaseListener) {
-        this.databaseListener = databaseListener;
+    public void addDatabaseListener(DatabaseListener databaseListener) {
+        databaseListenerList.add(databaseListener);
     }
 
     private void initialize(){
@@ -55,6 +57,8 @@ public abstract class AbstractFrontier {
         databaseConfig.setAllowCreate(true);
         databaseConfig.setSortedDuplicates(false);
         database = environment.openDatabase(null, "url_database", databaseConfig);
+
+        databaseListenerList = new ArrayList<DatabaseListener>();
     }
 
     protected void clean(){

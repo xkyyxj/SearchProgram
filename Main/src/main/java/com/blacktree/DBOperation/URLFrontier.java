@@ -6,6 +6,9 @@ import com.sleepycat.bind.serial.SerialBinding;
 import com.sleepycat.bind.serial.StoredClassCatalog;
 import com.sleepycat.je.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by wangqchf on 2016/9/24.
  */
@@ -61,7 +64,8 @@ public class URLFrontier extends AbstractFrontier{
                 return tempURL;
             } else {
                 DatabaseEvent databaseEvent = new DatabaseEvent(DBEventType.DBEMPTY,this);
-                databaseListener.databaseChanged(databaseEvent);
+                for(DatabaseListener databaseListener : databaseListenerList)
+                    databaseListener.databaseChanged(databaseEvent);
             }
         }
         return null;
@@ -97,6 +101,7 @@ public class URLFrontier extends AbstractFrontier{
     }
 
     private Cursor getReadCursor(){
+        CursorConfig cursorConfig = new CursorConfig();
         Cursor cursor = database.openCursor(null,null);
         return cursor;
     }

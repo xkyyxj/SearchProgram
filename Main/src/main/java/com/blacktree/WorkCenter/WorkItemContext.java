@@ -14,6 +14,8 @@ public class WorkItemContext {
 
     private URLFrontier urlFrontier;
 
+    private boolean numLimit;
+
     public WorkItemContext(AtomicLong maxCount, URLFrontier urlFrontier){
         this.maxCount = maxCount;
         this.urlFrontier = urlFrontier;
@@ -33,5 +35,13 @@ public class WorkItemContext {
 
     public void setUrlFrontier(URLFrontier urlFrontier) {
         this.urlFrontier = urlFrontier;
+    }
+
+    public boolean isNumLimit() {
+        return numLimit;
+    }
+
+    public void setNumLimit(boolean numLimit) {
+        this.numLimit = numLimit;
     }
 }
